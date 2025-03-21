@@ -117,34 +117,83 @@
           </div>
         </div>
         {% endfor %}
+        
         <!--historique des actions dans le details-->
         <h6 class="mt-4 mb-3">
           <b><font size="4" color="#4558c9">Historique des actions</font></b>
         </h6>
-        <ul class="list-group">
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <span class="text-muted small">28/02/2025 14:32</span>
-              <p class="mb-0">Demande créée par Tal</p>
-            </div>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              {% if mission.status == 'REFUSED' %}
-              <div class="mt-2 p-2 ">
-                <span class="badge bg-danger">Motif du refus :</span>
-                <p class="mt-1 mb-0">{{ mission.refusal_reason }}</p>
+        
+        <!-- Timeline style pour l'historique -->
+        <div class="timeline-container">
+          <!-- Première étape - Demande créée -->
+          <div class="timeline-step">
+            <div class="timeline-content">
+              <div class="timeline-icon">
+                <span class="circle-icon">+</span>
               </div>
-              {% endif %}
+              <div class="timeline-text">
+                <div>
+                  <span class="text-muted small">28/02/2025 14:32</span>
+                  <p class="mb-0">Demande créée par Tal</p>
+                </div>
+              </div>
             </div>
-          </li>
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            <div>
-              <span class="text-muted small">05/03/2025 11:30</span>
-              <p class="mb-0">Facture établie par Service Comptabilité</p>
+            <div class="timeline-line"></div>
+          </div>
+          
+          <!-- Deuxième étape - Validation -->
+          <div class="timeline-step">
+            <div class="timeline-content">
+              <div class="timeline-icon">
+                <span class="circle-icon">✓</span>
+              </div>
+              <div class="timeline-text">
+                <div>
+                  <span class="text-muted small">01/03/2025 09:45</span>
+                  <p class="mb-0">Validé par Jean-François Picard</p>
+                </div>
+                {% if mission.status == 'REFUSED' %}
+                <div class="mt-2 p-2">
+                  <span class="badge bg-danger">Motif du refus :</span>
+                  <p class="mt-1 mb-0">{{ mission.refusal_reason }}</p>
+                </div>
+                {% endif %}
+              </div>
             </div>
-          </li>
-        </ul>
+            <div class="timeline-line"></div>
+          </div>
+          
+          <!-- Troisième étape - Requiert -->
+          <div class="timeline-step">
+            <div class="timeline-content">
+              <div class="timeline-icon">
+                <span class="circle-icon" style="background-color: #fd7e14;">2</span>
+              </div>
+              <div class="timeline-text">
+                <div>
+                  <span class="text-muted small">03/03/2025 10:15</span>
+                  <p class="mb-0"><span style="color: #fd7e14; font-weight: bold;">Requiert</span> Lucie Pelletier (vous)</p>
+                </div>
+              </div>
+            </div>
+            <div class="timeline-line"></div>
+          </div>
+          
+          <!-- Étape finale - Facture -->
+          <div class="timeline-step">
+            <div class="timeline-content">
+              <div class="timeline-icon">
+                <span class="circle-icon" style="background-color: #28a745;">$</span>
+              </div>
+              <div class="timeline-text">
+                <div>
+                  <span class="text-muted small">05/03/2025 11:30</span>
+                  <p class="mb-0">Facture établie par Service Comptabilité</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
@@ -153,5 +202,63 @@
     </div>
   </div>
 </div>
-
 {% endfor %}
+
+<style>
+/* Style pour la timeline */
+.timeline-container {
+  position: relative;
+  margin-left: 15px;
+  padding-left: 30px;
+}
+
+.timeline-step {
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.timeline-line {
+  position: absolute;
+  left: -30px;
+  top: 25px;
+  bottom: 0;
+  width: 2px;
+  background-color: #e9ecef;
+}
+
+.timeline-content {
+  display: flex;
+  align-items: flex-start;
+}
+
+.timeline-icon {
+  position: absolute;
+  left: -46px;
+  z-index: 2;
+}
+
+.circle-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #0D6EFD;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.timeline-text {
+  flex: 1;
+}
+
+/* Ajouter une bordure à gauche pour les messages de refus */
+.timeline-text .mt-2.p-2 {
+  border-left: 4px solid #dc3545;
+  padding-left: 10px;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}
+</style>
