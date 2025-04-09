@@ -191,6 +191,12 @@
         <div class="modal-body">
           <form method="POST" action="{% url 'missions' %}">
             {% csrf_token %}
+            <!--lien bluedesk Odoo de la mission-->
+            <div class="mb-3">
+              <label class="form-label"> Lien Bluedesk </label>
+              <input type="text" class="form-control" name="bluedesk_link" min="0">
+            </div>
+            <!--lieu et technicien de la mission-->
             <h6 class="mt-4 mb-3">
               <b><font size="4" color="#4558c9">Lieu et techniciens </font></b>
             </h6>
@@ -316,7 +322,6 @@
       </div>
     </div>
   </div>
-
 
 
   <!--lien fichier html pour l'edit des missions modals-->

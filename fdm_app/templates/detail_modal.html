@@ -10,6 +10,9 @@
       <div class="modal-body">
         <div class="row mb-4">
           <div class="col-md-6">
+            <b><font size="4" color="#4558c9"> Lien bluedesk </font></b>
+            <p>{{ mission.bluedesk_link }}</p>
+            <!-- technicien de la mission -->
             <b><font size="4" color="#4558c9"> Techniciens </font></b>
             <p> {% for technicien in mission.techniciens.all %}
               {{ technicien.first_name }} {{ technicien.last_name }}<br>
@@ -125,15 +128,17 @@
         
         <!-- Timeline style pour l'historique -->
         <div class="timeline-container">
+
           <!-- Première étape - Demande créée -->
           <div class="timeline-step">
             <div class="timeline-content">
               <div class="timeline-icon">
                 <span class="circle-icon">+</span>
               </div>
+                <!-- date de création  -->
               <div class="timeline-text">
                 <div>
-                  <span class="text-muted small">28/02/2025 14:32</span>
+                  <span class="text-muted small">{{mission.created_at}}</span>
                   <p class="mb-0">Demande créée par Tal</p>
                 </div>
               </div>
@@ -142,26 +147,41 @@
           </div>
           
           <!-- Deuxième étape - Validation -->
-          <div class="timeline-step">
-            <div class="timeline-content">
-              <div class="timeline-icon">
-                <span class="circle-icon">✓</span>
-              </div>
-              <div class="timeline-text">
-                <div>
-                  <span class="text-muted small">01/03/2025 09:45</span>
-                  <p class="mb-0">Validé par Jean-François Picard</p>
-                </div>
-                {% if mission.status == 'REFUSED' %}
-                <div class="mt-2 p-2">
-                  <span class="badge bg-danger">Motif du refus :</span>
-                  <p class="mt-1 mb-0">{{ mission.refusal_reason }}</p>
-                </div>
-                {% endif %}
-              </div>
-            </div>
-            <div class="timeline-line"></div>
-          </div>
+<div class="timeline-step">
+  <div class="timeline-content">
+    <div class="timeline-icon">
+      <span class="circle-icon"
+      style="background-color: {% if mission.status == 'VALIDATED' %}#28a745{% elif mission.status == 'REFUSED' %}#dc3545{% elif mission.status == 'NEW' %}#4688A3{% else %}#0D6EFD{% endif %};">
+      {% if mission.status == 'REFUSED' %}✗{% elif mission.status == 'VALIDATED' %}✓{% else %}?{% endif %}
+      </span>
+    </div>
+    <div class="timeline-text">
+      <div>
+        <!-- Afficher la date en fonction du statut -->
+        <span class="text-muted small">
+          {% if mission.status == 'VALIDATED' %}
+            {{ mission.validated_at|date:"d/m/Y H:i" }}
+          {% elif mission.status == 'REFUSED' %}
+            {{ mission.refused_at|date:"d/m/Y H:i" }}
+          {% else %}
+            <!-- Vous pouvez laisser vide ou mettre un message d'attente -->
+            En attente
+          {% endif %}
+        </span>
+        <p class="mb-0">
+          {% if mission.status == 'REFUSED' %}Refusé{% elif mission.status == 'VALIDATED' %}Validé{% elif mission.status == 'NEW' %}En attente de validation{% else %}Statut inconnu{% endif %}
+        </p>
+      </div>
+      {% if mission.status == 'REFUSED' %}
+      <div class="mt-2 p-2">
+        <span class="badge bg-danger">Motif du refus :</span>
+        <p class="mt-1 mb-0">{{ mission.refusal_reason }}</p>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+   <div class="timeline-line"></div>
+    </div> 
           
           <!-- Troisième étape - Requiert -->
           <div class="timeline-step">

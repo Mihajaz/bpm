@@ -136,6 +136,7 @@ class MissionListView(View):
         
     # stockage des données de la mission dans la base
     def post(self, request, *args, **kwargs):
+        bluedesk_link = request.POST.get('bluedesk_link')
         mission_details = request.POST.get('mission_details')
         start_date = request.POST.get('start_date')
         start_hour = request.POST.get('start_hour')
@@ -153,6 +154,7 @@ class MissionListView(View):
         
         # Créer une nouvelle mission avec les données récupérées
         mission = Mission.objects.create(
+            bluedesk_link=bluedesk_link,
             mission_details=mission_details,
             start_date=start_date,
             start_hour=start_hour,
@@ -269,6 +271,7 @@ class EditMissionView(View):
         mission.status = 'NEW'
         
         # Récupérer les données du formulaire
+        bluedesk_link = request.POST.get('bluedesk_link')
         mission_details = request.POST.get('mission_details')
         start_date = request.POST.get('start_date')
         start_hour = request.POST.get('start_hour')
@@ -279,6 +282,7 @@ class EditMissionView(View):
         
         
         # Mettre à jour la mission
+        mission.bluedesk_link = bluedesk_link
         mission.mission_details = mission_details
         mission.start_date = start_date
         mission.start_hour = start_hour
