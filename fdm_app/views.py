@@ -17,6 +17,7 @@ import calendar
 import re
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 
 
 
@@ -346,6 +347,9 @@ class EditMissionView(View):
 #pour la validation des missions
 class ValidateMissionView(View):
     def post(self, request, *args, **kwargs):
+        if not request.user.has_perm('app_name.can_validate_mission'):
+            raise PermissionDenied
+        
         mission_id = request.POST.get('mission_id')
         comment = request.POST.get('comment', '')
         
@@ -356,10 +360,14 @@ class ValidateMissionView(View):
         messages.success(request, f"La mission a été validée avec succès.")
         # Redirection vers la page de liste ou de détail
         return redirect(reverse('missions'))  # Ajustez selon vos URLs
+        pass
+    
 
 #pour le refus de la mission
 class RefuseMissionView(View):
     def post(self, request, *args, **kwargs):
+        if not request.user.has_perm('app_name.can_refuse_mission'):
+            raise PermissionDenied
         mission_id = request.POST.get('mission_id')
         refusal_reason = request.POST.get('refusal_reason', '')
         
@@ -374,6 +382,7 @@ class RefuseMissionView(View):
         
         messages.success(request, f"La mission a été refusée.")
         return redirect(reverse('missions'))
+        pass
     
     
     

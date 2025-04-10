@@ -131,6 +131,12 @@ class Mission(models.Model):
             self.refused_at = datetime.datetime.now()
             
         super().save(*args, **kwargs)
+        
+    class Meta:
+        permissions = [
+            ("can_validate_mission","Peut valider une mission"),
+            ("can_refuse_mission","Peut refuser une mission"),
+            ]
     
 
    

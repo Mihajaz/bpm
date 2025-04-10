@@ -169,7 +169,7 @@
           {% endif %}
         </span>
         <p class="mb-0">
-          {% if mission.status == 'REFUSED' %}Refusé{% elif mission.status == 'VALIDATED' %}Validé{% elif mission.status == 'NEW' %}En attente de validation{% else %}Statut inconnu{% endif %}
+          {% if mission.status == 'REFUSED' %}Refusé{% elif mission.status == 'VALIDATED' %}Validé{% elif mission.status == 'NEW' %}En attente de validation par le DG{% else %}Statut inconnu{% endif %}
         </p>
       </div>
       {% if mission.status == 'REFUSED' %}

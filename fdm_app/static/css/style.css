@@ -342,14 +342,3 @@ margin-top: 15px;
 .main-content.expanded {
   margin-left: 70px;
 }
-
-
-.table-container {
-  max-height: 400px; /* Ajustez la hauteur pour afficher 10 lignes */
-  overflow-y: auto; /* Active le défilement vertical */
-}
-
-.table {
-  table-layout: fixed; /* Fixe la largeur des colonnes */
-  width: 100%;
-}

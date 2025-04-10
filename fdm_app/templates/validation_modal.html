@@ -14,7 +14,9 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          {% if user.is_authenticated and perms.fdm_app.can_validate_mission %}
           <button type="submit" class="btn btn-success">Valider</button>
+          {% endif %}
         </div>
       </form>
     </div>
@@ -41,7 +43,9 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          {% if user.is_authenticated and perms.fdm_app.can_refuse_mission %}
           <button type="submit" class="btn btn-danger">Refuser</button>
+          {% endif %}
         </div>
       </form>
     </div>
