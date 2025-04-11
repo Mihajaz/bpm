@@ -18,10 +18,13 @@ import re
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
-
-
-
-
+from django.template.loader import render_to_string
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from weasyprint import HTML
+from django.http import HttpResponse
+from io import BytesIO
+import tempfile
+from datetime import date
 
 #barre de recherche reutilisable
 class MissionSearchUtils:
@@ -384,9 +387,79 @@ class RefuseMissionView(View):
         return redirect(reverse('missions'))
         pass
     
+  
+
+  
+#class pour le telechargement du pdf dans le modal details 
+class GeneratePDFView(View):
+    def get(self, request, mission_id, *args, **kwargs):
+        # Récupérer la mission
+        mission = get_object_or_404(Mission, id=mission_id)
+        
+        # Charger le template HTML
+        context = {
+            'mission': mission,
+            'expenses': mission.depenses.all() 
+        }
+        
+        html_string = render_to_string('pdf_template.html', context)
+        
+        # Créer un fichier temporaire pour stocker le PDF
+        with tempfile.NamedTemporaryFile(suffix='.pdf', delete=False) as tmp:
+            temp_filename = tmp.name
+        
+        # Générer le PDF avec WeasyPrint
+        html = HTML(string=html_string)
+        html.write_pdf(temp_filename)
+        
+        # Lire le fichier temporaire et le renvoyer dans la réponse
+        with open(temp_filename, 'rb') as f:
+            pdf_content = f.read()
+            
+        # Retourner le fichier PDF en tant que réponse HTTP
+        response = HttpResponse(pdf_content, content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="mission_{mission.id}.pdf"'
+        
+        return response
     
-    
-    
-    
-    
-    
+
+
+#class pour le telechargement du pdf de toutes les missions
+class ExportMissionsPDFView(View):
+    def get(self, request):
+        # Récupérer toutes les missions
+        missions = Mission.objects.all().prefetch_related('depenses', 'techniciens')
+        
+        # Préparer les données pour le résumé
+        validated_count = missions.filter(status='VALIDATED').count()
+        new_count = missions.filter(status='NEW').count()
+        refused_count = missions.filter(status='REFUSED').count()
+        
+        # Calculer le total des dépenses
+        total_expenses = 0
+        for mission in missions:
+            for expense in mission.depenses.all():
+                total_expenses += expense.total_expenses
+        
+        # Préparer le contexte
+        context = {
+            'missions': missions,
+            'validated_count': validated_count,
+            'new_count': new_count,
+            'refused_count': refused_count,
+            'total_expenses': total_expenses,
+            'today': date.today(),
+        }
+        
+        # Rendre le HTML
+        html_string = render_to_string('missions_pdf_export.html', context)
+        
+        # Générer le PDF
+        html = HTML(string=html_string)
+        pdf_file = html.write_pdf()
+        
+        # Créer la réponse HTTP
+        response = HttpResponse(pdf_file, content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename="missions_export.pdf"'
+        
+        return response

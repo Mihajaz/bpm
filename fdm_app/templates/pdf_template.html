@@ -1,0 +1,72 @@
+
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails de la Mission</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h1, h2, h3 {
+            color: #4558c9;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Détails de la Mission - {{ mission.id }}</h1>
+    <p><strong>Lieu :</strong> {{ mission.location }}</p>
+    <p><strong>Dates :</strong> {{ mission.start_date|date:"d F Y" }} - {{ mission.end_date|date:"d F Y" }}</p>
+    <p><strong>Techniciens :</strong>
+        {% for technicien in mission.techniciens.all %}
+            {{ technicien.first_name }} {{ technicien.last_name }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            Aucun technicien
+        {% endfor %}
+    </p>
+    <h2>Dépenses</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Montant</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for expense in expenses %}
+            <tr>
+                <td>Hébergement</td>
+                <td>{{ expense.total_hosting }} Ar</td>
+            </tr>
+            <tr>
+                <td>Repas</td>
+                <td>{{ expense.total_meal_costs }} Ar</td>
+            </tr>
+            <tr>
+                <td>Transport</td>
+                <td>{{ expense.shipping_costs }} Ar</td>
+            </tr>
+            <tr>
+                <td>Frais divers</td>
+                <td>{{ expense.various_expenses_price }} Ar</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h3>Total à payer : {{ mission.depenses.first.total_expenses }} Ar</h3>
+</body>
+</html>

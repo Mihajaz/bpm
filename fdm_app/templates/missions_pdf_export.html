@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Export des Missions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #2c3e50;
+            padding-bottom: 10px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 0;
+        }
+        .summary {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #2c3e50;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .status-VALIDATED {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .status-NEW {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .status-REFUSED {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+            font-size: 12px;
+            color: #7f8c8d;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .page-break {
+            page-break-after: always;
+        }
+        .expense-detail {
+            margin-left: 20px;
+            font-size: 13px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Rapport des Missions</h1>
+        <p>Généré le {{ today|date:"d F Y" }}</p>
+    </div>
+
+    <div class="summary">
+        <h2>Résumé</h2>
+        <p>Total des missions: {{ missions|length }}</p>
+        <p>Missions validées: {{ validated_count }}</p>
+        <p>Nouvelles missions: {{ new_count }}</p>
+        <p>Missions refusées: {{ refused_count }}</p>
+        <p>Total des dépenses: {{ total_expenses|floatformat:2 }} Ar</p>
+    </div>
+
+    <h2>Liste des Missions</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Détails</th>
+                <th>Techniciens</th>
+                <th>Lieu</th>
+                <th>Date de début</th>
+                <th>Date de fin</th>
+                <th>Statut</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for mission in missions %}
+            <tr>
+                <td>{{ mission.id }}</td>
+                <td>{{ mission.mission_details|truncatechars:30 }}</td>
+                <td>
+                    {% for tech in mission.techniciens.all %}
+                        {{ tech.first_name }} {{ tech.last_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>{{ mission.location }}</td>
+                <td>{{ mission.start_date|date:"d/m/Y" }}</td>
+                <td>{{ mission.end_date|date:"d/m/Y" }}</td>
+                <td class="status-{{ mission.status }}">
+                    {% if mission.status == 'VALIDATED' %}Validée{% elif mission.status == 'NEW' %}Nouvelle{% else %}Refusée{% endif %}
+                </td>
+                <td>
+                    {% with total_mission_expenses=0 %}
+                        {% for expense in mission.depenses.all %}
+                            {% with total_mission_expenses=total_mission_expenses|add:expense.total_expenses %}{% endwith %}
+                        {% endfor %}
+                        {{ total_mission_expenses|floatformat:2 }} Ar
+                    {% endwith %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    <h2>Détail des Dépenses</h2>
+    {% for mission in missions %}
+        <h3>Mission #{{ mission.id }} - {{ mission.location }}</h3>
+        <p>Techniciens: 
+            {% for tech in mission.techniciens.all %}
+                {{ tech.first_name }} {{ tech.last_name }}{% if not forloop.last %}, {% endif %}
+            {% endfor %}
+            | Statut: 
+            <span class="status-{{ mission.status }}">
+                {% if mission.status == 'VALIDATED' %}Validée{% elif mission.status == 'NEW' %}Nouvelle{% else %}Refusée{% endif %}
+            </span>
+        </p>
+        
+        {% if mission.depenses.all %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Jours d'hébergement</th>
+                        <th>Prix nuitée</th>
+                        <th>Total hébergement</th>
+                        <th>Coût repas</th>
+                        <th>Total repas</th>
+                        <th>Transport</th>
+                        <th>Frais transport</th>
+                        <th>Divers</th>
+                        <th>Frais divers</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in mission.depenses.all %}
+                    <tr>
+                        <td>{{ expense.hosting_days }}</td>
+                        <td>{{ expense.overnight_rate|floatformat:2 }} Ar</td>
+                        <td>{{ expense.total_hosting|floatformat:2 }} Ar</td>
+                        <td>{{ expense.meal_costs|floatformat:2 }} Ar</td>
+                        <td>{{ expense.total_meal_costs|floatformat:2 }} Ar</td>
+                        <td>{{ expense.transport }}</td>
+                        <td>{{ expense.shipping_costs|floatformat:2 }} Ar</td>
+                        <td>{{ expense.various_expenses_details }}</td>
+                        <td>{{ expense.various_expenses_price|floatformat:2 }} Ar</td>
+                        <td><strong>{{ expense.total_expenses|floatformat:2 }} Ar</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="expense-detail">Aucune dépense enregistrée pour cette mission.</p>
+        {% endif %}
+        
+        {% if not forloop.last %}
+            <div class="page-break"></div>
+        {% endif %}
+    {% endfor %}
+
+    <div class="footer">
+        <p>Ce document a été généré automatiquement par le Système de Gestion des Missions.</p>
+        <p>© {{ today|date:"Y" }} Votre Entreprise - Tous droits réservés</p>
+    </div>
+</body>
+</html>
