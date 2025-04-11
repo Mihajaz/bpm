@@ -1,19 +1,25 @@
-<!--EN TÊTE DE L'APPLICATION-->
 <div class="card mb-4">
   <div class="card-body">
-    <div class="row mt-4">
+    <div class="row mt-4 justify-content-center">  <!-- Ajout de justify-content-center -->
+      <!-- Compteurs de missions -->
       <div class="col-md-3">
-        <!--nom de l'utilisateur -->
-        <div class="card bg-primary text-white">
-          <div class="card-body text-center">
-            <i class="fas fa-user-circle mb-2 fa-2x"></i>
-            <p class="mb-0 small">{{ user.username }}</p>
+        <div class="mission-counters">
+          <div class="card text-center" style="background-color: #4688A3; color: white; min-height: 120px; border: none;">
+            <div class="card-body p-3">
+              <i class="fas fa-bell fa-2x mb-2"></i>  <!-- Icône changée pour fa-bell -->
+              <p class="mb-1 small">Nouvelles missions</p>
+             
+              <p class="mb-0 h4"> {{ new_missions }} </p>
+            
+            </div>
           </div>
         </div>
       </div>
-      <div class="col-md-9 d-flex align-items-center">
-        <div class="export-buttons w-100">
-          <!--print-->
+      
+      <!--export des fichiers -->
+      <div class="col-md-6 d-flex align-items-center justify-content-center">  <!-- Ajout de justify-content-center -->
+        <div class="export-buttons w-100 text-center">  <!-- Ajout de text-center -->
+          <!--csv-->
           <a href="#" class="btn btn-outline-success me-2 mb-2">
             <i class="fas fa-file-csv mr-1"></i> CSV
           </a>

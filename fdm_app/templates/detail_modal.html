@@ -33,18 +33,18 @@
             <p>{% if mission.status == "NEW" %}
               <span class="badge badge-new" style="background-color:#4688A3">nouveau</span>
             {% elif mission.status == "REFUSED" %}
-              <span class="badge badge-refused" style="background-color: red;">refusée</span>
+              <span class="badge badge-refused" style="background-color: #EF5350;">refusée</span>
             {% elif mission.status == "VALIDATED" %}
-              <span class="badge badge-validated" style="background-color: green;">validée</span>
+              <span class="badge badge-validated" style="background-color: #4CAF50;">validée</span>
             {% endif %}</p>
             
             <b><font size="4" color="#4558c9"> Facturation </font></b>
             <Br>
             
             {% if mission.facturation %}
-              <td><span class="badge badge-billed" style="background-color:#28a745;">Facturé</span></td>
+              <td><span class="badge badge-billed" style="background-color: #4CAF50;">Facturé</span></td>
               {% else %}
-              <td><span class="badge badge-not-billed" style="background-color:red;">Non facturé</span></td>
+              <td><span class="badge badge-not-billed" style="background-color: #EF5350;">Non facturé</span></td>
               {% endif %}
             
               <h6 class="mt-4 mb-3">

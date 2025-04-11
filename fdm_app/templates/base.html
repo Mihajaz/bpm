@@ -14,25 +14,29 @@
     <!-- HTML du Sidebar -->
     <div class="sidebar" id="sidebar">
         <div class="logo">
-
             <span class="ms-2">Frais de mission </span>
             <button class="btn-toggle-sidebar ms-auto" id="toggleSidebar">
                 <i class="fas fa-bars"></i>
-            </button>
+             </button>
         </div>
+        
 
-        <!--acceder aà l'accueil-->
+        <!--acceder à l'accueil-->
         <div class="nav flex-column mt-3">
             <a href="{% url 'missions' %}" class="nav-link active" title="Accéder à l'accueil" >
                 <i class="fas fa-tachometer-alt"></i>
                 <span>Dashboard</span>
             </a>
+            <a href="#" class="nav-link" title="Utilisateur">
+                <i class="fas fa-user"></i>
+                <span>{{user.username}}</span>
+            </a>
            
             <!--se deconnecter-->
             <a href="{% url 'logout' %}" class="nav-link" title="se déconnecter" >
                 <i class="fas fa-sign-out-alt"></i>
-                <span>Déconnexion</span>
-               </a>
+                <span>Se déconnecter</span>
+            </a>
             
         </div>
     </div>
