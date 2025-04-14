@@ -1,3 +1,6 @@
+{% load static %}
+<!--En tête de la page d'accueil de l'application -->
+
 <div class="card mb-4">
   <div class="card-body">
     <div class="row mt-4 justify-content-center">  <!-- Ajout de justify-content-center -->
@@ -9,7 +12,9 @@
               <i class="fas fa-bell fa-2x mb-2"></i>  <!-- Icône changée pour fa-bell -->
               <p class="mb-1 small">Nouvelles missions</p>
              
-              <p class="mb-0 h4"> {{ new_missions }} </p>
+              <p class="mb-0 h4">
+               {{ new_missions }}
+               </p>
             
             </div>
           </div>
