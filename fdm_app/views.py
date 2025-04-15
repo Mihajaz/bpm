@@ -22,11 +22,12 @@ from django.template.loader import render_to_string
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from weasyprint import HTML
 from django.http import HttpResponse
-from io import BytesIO
+from io import BytesIO,StringIO
 import tempfile
 from datetime import date
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl import Workbook
+import csv
 
 
 #barre de recherche reutilisable
@@ -671,5 +672,59 @@ class ExportMissionsExcelView(View):
         return response
 
 
-
+#class pour l'export CSV 
+class ExportMissionsCSVView(View):
+    def get(self, request):
+        # Créer un buffer pour écrire le CSV
+        buffer = StringIO()
+        writer = csv.writer(buffer)
+        
+        # Écrire l'en-tête
+        writer.writerow([
+            'ID', 'Détails de la mission', 'Techniciens', 'Lieu', 
+            'Date de début', 'Date de fin', 'Statut', 'Total des dépenses(Ar)'
+        ])
+        
+        # Récupérer toutes les missions avec leurs relations
+        missions = Mission.objects.all().prefetch_related('depenses', 'techniciens')
+        
+        # Mapper les statuts pour l'affichage
+        status_mapping = {
+            'NEW': 'Nouvelle',
+            'VALIDATED': 'Validée',
+            'REFUSED': 'Refusée'
+        }
+        
+        # Écrire les données des missions
+        for mission in missions:
+            # Calculer le total des dépenses
+            total_expenses = sum(expense.total_expenses for expense in mission.depenses.all())
+            
+            # Obtenir la liste des techniciens formatée
+            tech_list = ', '.join([f"{tech.first_name} {tech.last_name}" for tech in mission.techniciens.all()])
+            
+            # Convertir les dates en format lisible
+            start_date = mission.start_date.strftime('%d/%m/%Y')
+            end_date = mission.end_date.strftime('%d/%m/%Y')
+            
+            # Récupérer l'affichage du statut
+            status_display = status_mapping.get(mission.status, mission.status)
+            
+            # Écrire la ligne
+            writer.writerow([
+                mission.id,
+                mission.mission_details,
+                tech_list,
+                mission.location,
+                start_date,
+                end_date,
+                status_display,
+                f"{total_expenses:.2f}"
+            ])
+        
+        # Préparer la réponse HTTP
+        response = HttpResponse(buffer.getvalue(), content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename=missions_export_{datetime.now().strftime("%Y%m%d")}.csv'
+        
+        return response
 
