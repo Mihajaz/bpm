@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import MissionListView, HistoryView, RegisterView , CustomLoginView ,CustomLogoutView,EditMissionView,GeneratePDFView,ExportMissionsPDFView,ExportMissionsExcelView,ExportMissionsCSVView
+from .views import MissionListView, HistoryView, RegisterView , CustomLoginView ,CustomLogoutView,EditMissionView,GeneratePDFView,ExportMissionsPDFView,ExportMissionsExcelView,ExportMissionsCSVView,ExportMissionsDocxView
 from . import views
 urlpatterns = [
     path('', MissionListView.as_view(), name='missions'),
@@ -14,4 +14,5 @@ urlpatterns = [
     path('export/pdf/', ExportMissionsPDFView.as_view(), name='export_pdf'),
     path('export/excel/', views.ExportMissionsExcelView.as_view(), name='export_excel'),
     path('export/csv/', views.ExportMissionsCSVView.as_view(), name='export_csv'),
+    path('export/docx/', views.ExportMissionsDocxView.as_view(), name='export_docx'),
 ]

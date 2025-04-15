@@ -28,7 +28,10 @@ from datetime import date
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 from openpyxl import Workbook
 import csv
-
+from docx import Document
+from docx.shared import Pt, Inches, RGBColor
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.table import WD_ALIGN_VERTICAL
 
 #barre de recherche reutilisable
 class MissionSearchUtils:
@@ -728,3 +731,193 @@ class ExportMissionsCSVView(View):
         
         return response
 
+
+#class pour l'export Word
+class ExportMissionsDocxView(View):
+    def get(self, request):
+        # Créer un nouveau document
+        doc = Document()
+        
+        # Configurer le style du document
+        style = doc.styles['Normal']
+        font = style.font
+        font.name = 'Calibri'
+        font.size = Pt(11)
+        
+        # Ajouter un titre
+        title = doc.add_heading('Rapport des Missions', level=0)
+        title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        
+        # Ajouter la date de génération
+        date_paragraph = doc.add_paragraph()
+        date_paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        date_paragraph.add_run(f'Généré le {datetime.now().strftime("%d/%m/%Y à %H:%M")}')
+        
+        # Ajouter un résumé
+        doc.add_heading('Résumé', level=1)
+        
+        # Récupérer les missions
+        missions = Mission.objects.all().prefetch_related('depenses', 'techniciens')
+        
+        # Calculer les statistiques
+        total_missions = missions.count()
+        validated_count = missions.filter(status='VALIDATED').count()
+        new_count = missions.filter(status='NEW').count()
+        refused_count = missions.filter(status='REFUSED').count()
+        
+        total_expenses = 0
+        for mission in missions:
+            mission_expenses = sum(expense.total_expenses for expense in mission.depenses.all())
+            total_expenses += mission_expenses
+        
+        # Ajouter les statistiques
+        summary_table = doc.add_table(rows=5, cols=2)
+        summary_table.style = 'Table Grid'
+        
+        summary_rows = [
+            ('Total des missions:', str(total_missions)),
+            ('Missions validées:', str(validated_count)),
+            ('Nouvelles missions:', str(new_count)),
+            ('Missions refusées:', str(refused_count)),
+            ('Total des dépenses:', f"{total_expenses:.2f} Ar")
+        ]
+        
+        for i, (label, value) in enumerate(summary_rows):
+            cell = summary_table.cell(i, 0)
+            cell.text = label
+            cell.paragraphs[0].runs[0].bold = True
+            
+            cell = summary_table.cell(i, 1)
+            cell.text = value
+        
+        # Ajouter un espace
+        doc.add_paragraph()
+        
+        # Liste des missions
+        doc.add_heading('Liste des Missions', level=1)
+        
+        # Mapper les statuts pour l'affichage
+        status_mapping = {
+            'NEW': 'Nouvelle',
+            'VALIDATED': 'Validée',
+            'REFUSED': 'Refusée'
+        }
+        
+        # Parcourir chaque mission
+        for mission in missions:
+            # Titre de la mission
+            mission_title = doc.add_heading(f'Mission #{mission.id}', level=2)
+            
+            # Ajouter les détails dans un tableau
+            details_table = doc.add_table(rows=6, cols=2)
+            details_table.style = 'Light Grid Accent 1'
+            
+            # Formater les dates
+            start_date = mission.start_date.strftime('%d/%m/%Y')
+            end_date = mission.end_date.strftime('%d/%m/%Y')
+            
+            # Obtenir la liste des techniciens
+            tech_list = ', '.join([f"{tech.first_name} {tech.last_name}" for tech in mission.techniciens.all()])
+            
+            # Total des dépenses
+            total_mission_expenses = sum(expense.total_expenses for expense in mission.depenses.all())
+            
+            # Récupérer l'affichage du statut
+            status_display = status_mapping.get(mission.status, mission.status)
+            
+            # Remplir le tableau des détails
+            details_rows = [
+                ('Détails:', mission.mission_details),
+                ('Lieu:', mission.location),
+                ('Date de début:', start_date),
+                ('Date de fin:', end_date),
+                ('Techniciens:', tech_list),
+                ('Statut:', status_display)
+            ]
+            
+            for i, (label, value) in enumerate(details_rows):
+                cell = details_table.cell(i, 0)
+                cell.text = label
+                cell.width = Inches(1.5)
+                cell.paragraphs[0].runs[0].bold = True
+                
+                cell = details_table.cell(i, 1)
+                cell.text = value
+                
+                # Colorer le statut
+                if label == 'Statut:':
+                    run = cell.paragraphs[0].runs[0]
+                    if value == 'Validée':
+                        run.font.color.rgb = RGBColor(39, 174, 96)  # Vert
+                        run.bold = True
+                    elif value == 'Refusée':
+                        run.font.color.rgb = RGBColor(231, 76, 60)  # Rouge
+                        run.bold = True
+                    elif value == 'Nouvelle':
+                        run.font.color.rgb = RGBColor(243, 156, 18)  # Orange
+                        run.bold = True
+            
+            # Ajouter des dépenses si elles existent
+            expenses = mission.depenses.all()
+            if expenses:
+                doc.add_heading('Dépenses', level=3)
+                
+                # Créer un tableau pour les dépenses
+                expense_table = doc.add_table(rows=1, cols=6)
+                expense_table.style = 'Table Grid'
+                
+                # En-têtes
+                headers = ['Nuitées', 'Hébergement', 'Repas', 'Transport', 'Divers', 'Total']
+                for i, header in enumerate(headers):
+                    cell = expense_table.cell(0, i)
+                    cell.text = header
+                    cell.paragraphs[0].runs[0].bold = True
+                    cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+                
+                # Ajouter chaque dépense
+                for expense in expenses:
+                    row_cells = expense_table.add_row().cells
+                    row_cells[0].text = f"{expense.hosting_days} jours × {expense.overnight_rate:.2f} Ar"
+                    row_cells[1].text = f"{expense.total_hosting:.2f} Ar"
+                    row_cells[2].text = f"{expense.total_meal_costs:.2f} Ar"
+                    row_cells[3].text = f"{expense.shipping_costs:.2f} Ar ({expense.transport})"
+                    row_cells[4].text = f"{expense.various_expenses_price:.2f} Ar"
+                    row_cells[5].text = f"{expense.total_expenses:.2f} Ar"
+                    
+                    # Centrer les cellules
+                    for cell in row_cells:
+                        cell.paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                
+                # Ajouter une ligne pour le total de la mission
+                row_cells = expense_table.add_row().cells
+                row_cells[4].text = "TOTAL:"
+                row_cells[4].paragraphs[0].runs[0].bold = True
+                row_cells[4].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                
+                row_cells[5].text = f"{total_mission_expenses:.2f} €"
+                row_cells[5].paragraphs[0].runs[0].bold = True
+                row_cells[5].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
+            
+            # Ajouter un saut de page après chaque mission (sauf la dernière)
+            if mission != missions.last():
+                doc.add_page_break()
+        
+        # Sauvegarder dans un buffer
+        buffer = BytesIO()
+        doc.save(buffer)
+        buffer.seek(0)
+        
+        # Créer la réponse HTTP
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        )
+        response['Content-Disposition'] = 'attachment; filename=missions_rapport.docx'
+        
+        return response
+    
+    
+    
+    
+    
+    
