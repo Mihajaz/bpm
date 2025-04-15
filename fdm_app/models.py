@@ -147,7 +147,7 @@ class Expense(models.Model):
     
     hosting_days = models.IntegerField(
         help_text='nombre de jours de sejour',
-        default=0.0,
+        default=1,
     )
     
     overnight_rate = models.DecimalField(
@@ -169,6 +169,7 @@ class Expense(models.Model):
         max_digits=10,
         decimal_places=2,
         help_text='prix des repas',
+        default=0.00,
     )
     
     total_meal_costs = models.DecimalField(
@@ -189,6 +190,7 @@ class Expense(models.Model):
         max_digits=10,
         decimal_places=2,
         help_text='frais de transport',
+        default=0.00,
     )
     
     various_expenses_details = models.CharField(
@@ -200,6 +202,7 @@ class Expense(models.Model):
         max_digits=10,
         decimal_places=2,
         help_text='prix des divers frais',
+        default=0.00,
     )
     
     total_expenses = models.DecimalField(

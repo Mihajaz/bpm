@@ -1,260 +1,347 @@
 :root {
-    --primary-color: #4558c9;
-    --secondary-color: #e9ecef;
-    --text-color: #333;
-    --bg-light: #f8f9fa;
-    --border-radius: 8px;
+  --primary-color: #4558c9;
+  --secondary-color: #e9ecef;
+  --text-color: #333;
+  --bg-light: #f8f9fa;
+  --border-radius: 8px;
+  --table-header-bg: #4558c9; /* Couleur d'en-tête comme sur la photo */
+  --table-row-alt: #f2f2f2; /* Couleur alternée pour les lignes */
+  --sidebar-width: 55px; /* Fermé par défaut */
+  --sidebar-expanded-width: 210px;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  color: var(--text-color);
+}
+
+.main-content {
+  margin-left: 250px;
+  padding: 20px;
+  transition: all 0.3s;
+}
+
+.main-content-expanded {
+  margin-left: 60px;
+}
+
+.card {
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  margin-bottom: 20px;
+  border: none;
+}
+
+.card-header {
+  background-color: white;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  font-weight: bold;
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* Style du tableau modifié */
+.table-container {
+  height: 500px; /* Hauteur fixe pour le tableau */
+  overflow-y: auto; /* Défilement vertical si nécessaire */
+  margin-bottom: 20px;
+  border-radius: var(--border-radius);
+  border: 1px solid rgba(0,0,0,0.1);
+}
+
+.mission-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.mission-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+/* Couleur des en-têtes comme sur la photo */
+.mission-table th {
+  font-weight: 600;
+  padding: 15px;
+  text-align: left;
+  background-color: var(--table-header-bg);
+  color: white;
+  white-space: nowrap;
+  border-right: 1px solid rgba(255, 255, 255, 0.3); /* Lignes verticales entre colonnes dans l'en-tête */
+}
+
+.mission-table th:last-child {
+  border-right: none; /* Pas de bordure pour la dernière colonne */
+}
+
+/* Lignes alternées dans le corps du tableau */
+.mission-table tbody tr:nth-child(even) {
+  background-color: var(--table-row-alt);
+}
+
+.mission-table tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+.mission-table td {
+  padding: 12px 15px;
+  border-bottom: 1px solid #e9ecef;
+  vertical-align: middle;
+  border-right: 1px solid #e9ecef; /* Lignes verticales entre colonnes */
+}
+
+.mission-table td:last-child {
+  border-right: none; /* Pas de bordure pour la dernière colonne */
+}
+
+.mission-table tbody tr:hover {
+  background-color: rgba(69, 88, 201, 0.05);
+}
+
+/* Style des badges */
+.badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 500;
+  color: white;
+  display: inline-block;
+}
+
+.badge-new {
+  background-color: #4688A3;
+}
+
+.badge-validated {
+  background-color: #81C784;
+}
+
+.badge-refused {
+  background-color: #EF5350;
+}
+
+.badge-closed {
+  background-color: #6c757d;
+}
+
+.badge-billed {
+  background-color: #4CAF50;
+}
+
+.badge-not-billed {
+  background-color: #EF5350;
+}
+
+/* Style amélioré pour les icônes d'action - taille et espacement comme avant */
+.action-icons {
+  white-space: nowrap;
+  text-align: center;
+}
+
+.action-icons i {
+  font-size: 1rem; /* Taille réduite pour correspondre à la photo */
+  margin-right: 5px; /* Espacement réduit entre les icônes */
+  padding: 4px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-icons .validate {
+  color: #28a745;
+}
+
+.action-icons .refuse {
+  color: #dc3545;
+}
+
+.action-icons .details {
+  color: var(--primary-color);
+}
+
+.action-icons .edit {
+  color: #fd7e14;
+}
+
+.action-icons i:hover {
+  transform: scale(1.2);
+  background-color: rgba(0,0,0,0.05);
+}
+
+/* Assure que le tableau est responsive */
+@media (max-width: 992px) {
+  .table-container {
+    overflow-x: auto;
   }
   
-  body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
-    color: var(--text-color);
+  .mission-table {
+    min-width: 1000px; /* Assure que le tableau a une largeur minimum */
+  }
+}
+
+.pagination-container {
+  height: 60px; /* Hauteur fixe, ajustez selon vos besoins */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.pagination {
+  justify-content: center;
+  margin: 0; 
+}
+
+.pagination .page-item .page-link {
+  color: var(--primary-color);
+  min-width: 40px; /* Largeur minimale pour uniformité */
+  height: 40px; /* Hauteur fixe pour les boutons */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+.form-control, .form-select {
+  border-radius: var(--border-radius);
+  padding: 10px 15px;
+}
+
+/* Animation */
+.fade-in {
+  animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.nav-tabs .nav-link {
+  color: var(--text-color);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 0;
+  position: relative;
+}
+
+.nav-tabs .nav-link.active {
+  color: var(--primary-color);
+  background-color: transparent;
+  font-weight: bold;
+}
+
+.nav-tabs .nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: var(--primary-color);
+}
+
+.cloud-account-card {
+  border: 1px solid #e0e0e0;
+  border-radius: var(--border-radius);
+  margin-bottom: 20px;
+}
+
+.cloud-account-header {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 10px 15px;
+  border-top-left-radius: var(--border-radius);
+  border-top-right-radius: var(--border-radius);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.env-table {
+  margin: 0;
+}
+
+.env-table td, .env-table th {
+  padding: 12px 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.env-table th {
+  background-color: #f8f9fa;
+  font-weight: 500;
+  color: #666;
+}
+
+.badge-cloud {
+  background-color: rgba(69, 88, 201, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(69, 88, 201, 0.2);
+  font-size: 0.8rem;
+  padding: 5px 10px;
+  border-radius: var(--border-radius);
+}
+
+.detail-modal .modal-header {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.detail-sections {
+  padding: 15px;
+}
+
+.detail-section {
+  margin-bottom: 20px;
+  padding: 15px;
+  border-radius: var(--border-radius);
+  background-color: #f8f9fa;
+}
+
+.detail-section h5 {
+  margin-bottom: 15px;
+  color: var(--primary-color);
+  font-weight: bold;
+}
+
+/* Override bootstrap modal animation */
+.modal.fade .modal-dialog {
+  transition: transform .3s ease-out;
+  transform: scale(0.8);
+}
+
+.modal.show .modal-dialog {
+  transform: scale(1);
+}
+
+@media (max-width: 768px) {
+  .mobile-sidebar-toggle {
+    display: block;
   }
   
   .main-content {
-    margin-left: 250px;
-    padding: 20px;
-    transition: all 0.3s;
+    margin-left: 0;
+    padding-top: 50px;
   }
   
-  .main-content-expanded {
-    margin-left: 60px;
-  }
   
-  .card {
-    border-radius: var(--border-radius);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-    border: none;
-  }
-  
-  .card-header {
-    background-color: white;
-    border-bottom: 1px solid rgba(0,0,0,0.05);
-    font-weight: bold;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .btn-primary {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-  }
-  
-  .table th {
-    font-weight: 600;
-    border-top: none;
-  }
-  
-  .badge {
-    padding: 6px 12px;
-    border-radius: 20px;
-    font-weight: 500;
-  }
-  
-  .badge-validated {
-    background-color: #28a745;
-    color: white;
-  }
-  
-  .badge-refused {
-    background-color: #dc3545;
-    color: white;
-  }
-  
-  .badge-closed {
-    background-color: #6c757d;
-    color: white;
-  }
-  
-  .badge-billed {
-    background-color: #198754;
-    color: white;
-  }
-  
-  .badge-not-billed {
-    background-color: #fd7e14;
-    color: white;
-  }
-  
-  .action-icons .validate {
-    color: #28a745;
-  }
-  
-  .action-icons .refuse {
-    color: #dc3545;
-  }
-  
-  .action-icons .details {
-    color: var(--primary-color);
-  }
-  
-  .action-icons i:hover {
-    transform: scale(1.2);
-    background-color: rgba(0,0,0,0.05);
-  }
-
-
-.pagination-container {
-height: 60px; /* Hauteur fixe, ajustez selon vos besoins */
-display: flex;
-align-items: center;
-justify-content: center;
-margin-top: 15px;
 }
-  
-  .pagination {
-    justify-content: center;
-    margin: 0; 
-  }
-  
-  .pagination .page-item .page-link {
-    color: var(--primary-color);
-    min-width: 40px; /* Largeur minimale pour uniformité */
-    height: 40px; /* Hauteur fixe pour les boutons */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-  }
-  
-  .pagination .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-  }
-  
-  .form-control, .form-select {
-    border-radius: var(--border-radius);
-    padding: 10px 15px;
-  }
-  
-  /* Animation */
-  .fade-in {
-    animation: fadeIn 0.5s;
-  }
-  
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  
-  .nav-tabs .nav-link {
-    color: var(--text-color);
-    border: none;
-    padding: 10px 20px;
-    border-radius: 0;
-    position: relative;
-  }
-  
-  .nav-tabs .nav-link.active {
-    color: var(--primary-color);
-    background-color: transparent;
-    font-weight: bold;
-  }
-  
-  .nav-tabs .nav-link.active::after {
-    content: '';
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 3px;
-    background-color: var(--primary-color);
-  }
-  
-  .cloud-account-card {
-    border: 1px solid #e0e0e0;
-    border-radius: var(--border-radius);
-    margin-bottom: 20px;
-  }
-  
-  .cloud-account-header {
-    background-color: var(--primary-color);
-    color: white;
-    padding: 10px 15px;
-    border-top-left-radius: var(--border-radius);
-    border-top-right-radius: var(--border-radius);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  
-  .env-table {
-    margin: 0;
-  }
-  
-  .env-table td, .env-table th {
-    padding: 12px 15px;
-    border-top: 1px solid #f0f0f0;
-  }
-  
-  .env-table th {
-    background-color: #f8f9fa;
-    font-weight: 500;
-    color: #666;
-  }
-  
-  .badge-cloud {
-    background-color: rgba(69, 88, 201, 0.1);
-    color: var(--primary-color);
-    border: 1px solid rgba(69, 88, 201, 0.2);
-    font-size: 0.8rem;
-    padding: 5px 10px;
-    border-radius: var(--border-radius);
-  }
-  
-  .detail-modal .modal-header {
-    background-color: var(--primary-color);
-    color: white;
-  }
-  
-  .detail-sections {
-    padding: 15px;
-  }
-  
-  .detail-section {
-    margin-bottom: 20px;
-    padding: 15px;
-    border-radius: var(--border-radius);
-    background-color: #f8f9fa;
-  }
-  
-  .detail-section h5 {
-    margin-bottom: 15px;
-    color: var(--primary-color);
-    font-weight: bold;
-  }
-  
-  /* Override bootstrap modal animation */
-  .modal.fade .modal-dialog {
-    transition: transform .3s ease-out;
-    transform: scale(0.8);
-  }
-  
-  .modal.show .modal-dialog {
-    transform: scale(1);
-  }
-  
-  @media (max-width: 768px) {
-    .mobile-sidebar-toggle {
-      display: block;
-    }
-    
-    .main-content {
-      margin-left: 0;
-      padding-top: 50px;
-    }
-    
-    .main-content-expanded {
-      margin-left: 60px;
-    }
-  }
 
-  /* CSS du Sidebar */
+/* CSS du Sidebar */
 .sidebar {
   background-color: var(--primary-color);
   color: white;
@@ -336,7 +423,7 @@ margin-top: 15px;
   margin-left: var(--sidebar-width, 250px);
   padding: 20px;
   transition: all 0.3s;
-  padding-left: 0 ;
+  padding-left: 0;
 }
 
 .main-content.expanded {

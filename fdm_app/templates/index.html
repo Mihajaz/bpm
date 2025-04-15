@@ -1,9 +1,8 @@
-
- {% extends 'base.html' %}
+{% extends 'base.html' %}
  
- {% block title %}Gestion des Frais de Mission {% endblock %}
+{% block title %}Gestion des Frais de Mission {% endblock %}
 
- {% block content %}
+{% block content %}
 
 <body>
   <!-- Main Content -->
@@ -43,13 +42,13 @@
         </div>
       </div>
 
-        <!--tableau des listes des demandes de frais de missions-->
+      <!--tableau des listes des demandes de frais de missions-->
       <div class="card-body fade-in">
-        <div class="table-responsive">
-          <table class="table table-hover">
+        <div class="table-container">
+          <table class="table table-hover mission-table">
             <thead>
               <tr>
-                <th>ID Mission</th>
+                <th>ID</th>
                 <th>Lieu</th>
                 <th>Technicien</th>
                 <th>Date début</th>
@@ -60,15 +59,12 @@
                 <th>Actions</th>
               </tr>
             </thead>
-
-
-          
+            
             <tbody>
-
               <!-- Vue du tableau des données sur la mission -->
               {% for mission in missions %}
               <tr>
-                <td> {{ mission.id }} </td>
+                <td>{{ mission.id }}</td>
                 <td>{{ mission.location }}</td>
                 <td>
                   {% for technicien in mission.techniciens.all %}
@@ -77,35 +73,31 @@
                     Aucun technicien
                   {% endfor %}
                 </td>
-                <td>{{ mission.start_date|date:"d F Y" }} à {{ mission.start_hour|time:"H:i" }} </td>
+                <td>{{ mission.start_date|date:"d F Y" }} à {{ mission.start_hour|time:"H:i" }}</td>
                 <td>{{ mission.end_date|date:"d F Y" }} à {{ mission.end_hour|time:"H:i" }}</td>
 
                 {% if mission.facturation %}
-                <td><span class="badge badge-billed" style="background-color: #4CAF50;">Facturé</span></td>
+                <td><span class="badge badge-billed">Facturé</span></td>
                 {% else %}
-                <td><span class="badge badge-not-billed" style="background-color: #EF5350;">Non facturé</span></td>
+                <td><span class="badge badge-not-billed">Non facturé</span></td>
                 {% endif %}
 
                 {% for expense in mission.depenses.all %}
-                <td> {{ expense.total_expenses }} Ar </td>
+                <td>{{ expense.total_expenses }} Ar</td>
                 {% endfor %}
                 
                 <!--statut de la mission-->
-               
                 <td>
                   {% if mission.status == "NEW" %}
-                    <span class="badge badge-new" style="background-color: #4688A3">nouveau</span>
+                    <span class="badge badge-new">nouveau</span>
                   {% elif mission.status == "REFUSED" %}
-                    <span class="badge badge-refused" style="background-color: #EF5350;">refusée</span>
+                    <span class="badge badge-refused">refusée</span>
                   {% elif mission.status == "VALIDATED" %}
-                    <span class="badge badge-validated" style="background-color: #81C784;">validée</span>
-
+                    <span class="badge badge-validated">validée</span>
                   {% endif %}
                 </td>
             
-
-                <!-- Icon de valider ,mise à jour, details et refuser -->
-                
+                <!-- Icon de valider, mise à jour, details et refuser -->
                 <td class="action-icons">
                   <!-- Icone pour valider la mission -->
                   {% if user.is_authenticated and perms.fdm_app.can_validate_mission %}
@@ -113,25 +105,24 @@
                     data-bs-toggle="modal"
                     data-bs-target="#validateModal"
                     data-mission-id="{{ mission.id }}"
-                    title = "Valider" >
+                    title="Valider">
                   </i>
                   <i class="fas fa-times-circle refuse" 
                      data-bs-toggle="modal"  
                      data-bs-target="#refuseModal" 
-                     data-mission-id = "{{ mission.id }}"
-                     title = "Refuser">
+                     data-mission-id="{{ mission.id }}"
+                     title="Refuser">
                   </i>
                   {% endif %}
                   <i class="fas fa-info-circle details" 
                   data-bs-toggle="modal" 
                   data-bs-target="#detailModal{{ mission.id }}" 
                   title="Détails">
-                   </i>
-
+                  </i>
 
                   {% if user.is_authenticated and not perms.fdm_app.can_validate_mission %}
-                <!-- Bouton pour modifier la mission -->
-                   <i class="fas fa-edit edit" 
+                  <!-- Bouton pour modifier la mission -->
+                  <i class="fas fa-edit edit" 
                      data-bs-toggle="modal" 
                      data-bs-target="#editMissionModal{{ mission.id }}" 
                      title="Modifier">
@@ -139,10 +130,7 @@
                   {% endif %}
                 </td>
               </tr>
-
               {% endfor %}
-
-               
             </tbody>
           </table>
         </div>
@@ -153,7 +141,7 @@
             <ul class="pagination">
               {% if missions.has_previous %}
                 <li class="page-item">
-                  <a class="page-link" href="?page={{ missions.previous_page_number }}" aria-label="Previous">
+                  <a class="page-link" href="?page={{ missions.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                   </a>
                 </li>
@@ -168,7 +156,7 @@
               {% for num in missions.paginator.page_range %}
                 {% if missions.number == num %}
                   <li class="page-item active">
-                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %} ">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">
                       {{ num }}
                     </a>
                   </li>
@@ -193,8 +181,10 @@
             </ul>
           </nav>
         </div>
-    
-  <!-- Ajouter les demandes de frais de mission modals -->
+      </div>
+    </div>
+  
+  <!-- Ajouter des demandes de frais de mission modals -->
       <div class="modal fade" id="addMissionModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -221,7 +211,7 @@
               </div>
               <div class="col-md-6">
       <label class="form-label">Technicien</label>
-      <select class="form-control" multiple="multiple" name="techniciens" id="technicien-select">
+      <select class="form-control" multiple="multiple" name="techniciens" id="technicien-select" required>
        
         {% for technician in technicians %}
         <option value="{{ technician.id }}" >{{technician.first_name}} {{technician.last_name}} </option>
@@ -231,7 +221,7 @@
     </div>
   </div>
   <div class="mb-3 form-check">
-    <input type="checkbox" class="form-check-input" name="facturation" id="facturationCheck">
+    <input type="checkbox" class="form-check-input" name="facturation" id="facturationCheck" >
     <label class="form-check-label" for="facturationCheck">
       <b><font size="4" color="#4558c9">Facturer</font></b>
     </label>
@@ -276,11 +266,11 @@
             <div class="row mb-3">
               <div class="col-md-6">
                 <label class="form-label">Nombre de jours</label>
-                <input type="number" class="form-control" name="hosting_days" min="0">
+                <input type="number" class="form-control" name="hosting_days" min="0" value="1" >
               </div>
               <div class="col-md-6">
                 <label class="form-label"  >Tarif nuitée (Ar)</label>
-                <input type="number" class="form-control" name="overnight_rate" min="0" >
+                <input type="number" class="form-control" name="overnight_rate" min="0" value="0" >
               </div>
               
             </div>
@@ -291,7 +281,7 @@
             <div class="row mb-3">
               <div class="col-md-12">
                 <label class="form-label">Budget repas/jour (Ar)</label>
-                <input type="number" class="form-control" name="meal_costs" min="0">
+                <input type="number" class="form-control" name="meal_costs" min="0" required>
               </div>
               
             </div>
@@ -301,7 +291,7 @@
             </h6>
             <div class="mb-3">
               <label class="form-label">Moyen de transport</label>
-              <select class="form-select" name="transport" >
+              <select class="form-select" name="transport" required>
                 <option selected>Choisir un moyen de transport</option>
                 <option value="Taxi-brousse" >Taxi-brousse</option>
                 <option value="Véhicule de société">Véhicule de société</option>
@@ -313,7 +303,7 @@
             </div>
             <div class="mb-3">
               <label class="form-label">Coût du transport (Ar)</label>
-              <input type="number" class="form-control" name="shipping_costs" min="0">
+              <input type="number" class="form-control" name="shipping_costs" min="0" required>
             </div>
             
             <h6 class="mt-4 mb-3">
@@ -321,11 +311,11 @@
             </h6>
             <div class="mb-3">
               <label class="form-label">Description</label>
-              <input type="text" class="form-control" name="various_expenses_details" placeholder="Description des frais divers">
+              <input type="text" class="form-control" name="various_expenses_details" placeholder="Description des frais divers" required>
             </div>
             <div class="mb-3">
               <label class="form-label">Montant (Ar)</label>
-              <input type="number" class="form-control" name="various_expenses_price" min="0">
+              <input type="number"  class="form-control" name="various_expenses_price" min="0" value="0" >
             </div>
         </div>
         <div class="modal-footer">
@@ -381,6 +371,3 @@
 </body>
 </html>
 {% endblock %}
-
- 
-  

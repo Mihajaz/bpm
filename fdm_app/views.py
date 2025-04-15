@@ -25,6 +25,9 @@ from django.http import HttpResponse
 from io import BytesIO
 import tempfile
 from datetime import date
+from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+from openpyxl import Workbook
+
 
 #barre de recherche reutilisable
 class MissionSearchUtils:
@@ -130,10 +133,14 @@ class MissionListView(View):
 
         # Récupère les techniciens pour le formulaire
         technicians = Technician.objects.all()
+        # Compter les missions avec statut NEW
+        new_missions = Mission.objects.filter(status='NEW').count()
+        
         context = {
             'missions': missions,
             'technicians': technicians,
-            'active_tab': 'missions'  # Pour le style lorsqu'on clique sur historique ou accueil
+            'active_tab': 'missions',  # Pour le style lorsqu'on clique sur historique ou accueil
+            'new_missions': new_missions 
         }
         return render(request, 'index.html', context)
         
@@ -388,8 +395,6 @@ class RefuseMissionView(View):
         pass
     
   
-
-  
 #class pour le telechargement du pdf dans le modal details 
 class GeneratePDFView(View):
     def get(self, request, mission_id, *args, **kwargs):
@@ -422,7 +427,6 @@ class GeneratePDFView(View):
         
         return response
     
-
 
 #class pour le telechargement du pdf de toutes les missions
 class ExportMissionsPDFView(View):
@@ -463,3 +467,209 @@ class ExportMissionsPDFView(View):
         response['Content-Disposition'] = 'attachment; filename="missions_export.pdf"'
         
         return response
+    
+    
+#class pour l'export Excel des missions 
+class ExportMissionsExcelView(View):
+    def get(self, request):
+        # Créer un nouveau classeur
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Missions"
+        
+        # Définir les styles
+        header_font = Font(name='Arial', bold=True, color='FFFFFF')
+        header_fill = PatternFill(start_color='2C3E50', end_color='2C3E50', fill_type='solid')
+        header_alignment = Alignment(horizontal='center', vertical='center')
+        border = Border(
+            left=Side(style='thin', color='000000'),
+            right=Side(style='thin', color='000000'),
+            top=Side(style='thin', color='000000'),
+            bottom=Side(style='thin', color='000000')
+        )
+        
+        # En-têtes des colonnes
+        headers = [
+            'ID', 'Détails', 'Techniciens', 'Lieu', 'Date de début', 
+            'Date de fin', 'Statut', 'Total des dépenses(Ar)'
+        ]
+        
+        # Appliquer les en-têtes
+        for col_num, header in enumerate(headers, 1):
+            cell = ws.cell(row=1, column=col_num)
+            cell.value = header
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        # Définir la largeur des colonnes
+        for col in range(1, len(headers) + 1):
+            ws.column_dimensions[chr(64 + col)].width = 20
+        
+        # Récupérer les données des missions
+        missions = Mission.objects.all().prefetch_related('depenses', 'techniciens')
+        
+        # Ajouter les données
+        row_num = 2
+        for mission in missions:
+            # Calculer le total des dépenses pour cette mission
+            total_expenses = sum(expense.total_expenses for expense in mission.depenses.all())
+            
+            # Obtenir la liste des techniciens
+            tech_list = ', '.join([f"{tech.first_name} {tech.last_name}" for tech in mission.techniciens.all()])
+            
+            # Mapper les statuts
+            status_mapping = {
+                'NEW': 'Nouvelle',
+                'VALIDATED': 'Validée',
+                'REFUSED': 'Refusée'
+            }
+            status_display = status_mapping.get(mission.status, mission.status)
+            
+            # Ajouter les données de la mission
+            row = [
+                mission.id,
+                mission.mission_details[:100],  # Tronquer pour éviter des cellules trop longues
+                tech_list,
+                mission.location,
+                mission.start_date.strftime('%d/%m/%Y'),
+                mission.end_date.strftime('%d/%m/%Y'),
+                status_display,
+                f"{total_expenses:.2f} "
+            ]
+            
+            for col_num, cell_value in enumerate(row, 1):
+                cell = ws.cell(row=row_num, column=col_num)
+                cell.value = cell_value
+                cell.border = border
+                
+                # Appliquer des styles spécifiques selon le statut
+                if col_num == 7:  # Colonne du statut
+                    if cell_value == 'Validée':
+                        cell.font = Font(color='27AE60', bold=True)
+                    elif cell_value == 'Refusée':
+                        cell.font = Font(color='E74C3C', bold=True)
+                    elif cell_value == 'Nouvelle':
+                        cell.font = Font(color='F39C12', bold=True)
+            
+            row_num += 1
+        
+        # Créer un second onglet pour les détails des dépenses
+        ws_expenses = wb.create_sheet(title="Détails des dépenses")
+        
+        # En-têtes pour les dépenses
+        expense_headers = [
+            'ID Mission', 'Mission', 'Techniciens', 'Jours d\'hébergement', 'Prix nuitée', 
+            'Total hébergement', 'Coût repas', 'Total repas', 'Transport', 
+            'Frais de transport', 'Divers', 'Frais divers', 'Total'
+        ]
+        
+        # Appliquer les en-têtes
+        for col_num, header in enumerate(expense_headers, 1):
+            cell = ws_expenses.cell(row=1, column=col_num)
+            cell.value = header
+            cell.font = header_font
+            cell.fill = header_fill
+            cell.alignment = header_alignment
+            cell.border = border
+        
+        # Définir la largeur des colonnes
+        for col in range(1, len(expense_headers) + 1):
+            ws_expenses.column_dimensions[chr(64 + col)].width = 18
+        
+        # Ajouter les données des dépenses
+        row_num = 2
+        for mission in missions:
+            tech_list = ', '.join([f"{tech.first_name} {tech.last_name}" for tech in mission.techniciens.all()])
+            
+            for expense in mission.depenses.all():
+                row = [
+                    mission.id,
+                    mission.mission_details[:50],
+                    tech_list,
+                    expense.hosting_days,
+                    f"{expense.overnight_rate:.2f} ",
+                    f"{expense.total_hosting:.2f} ",
+                    f"{expense.meal_costs:.2f} ",
+                    f"{expense.total_meal_costs:.2f} ",
+                    expense.transport,
+                    f"{expense.shipping_costs:.2f} ",
+                    expense.various_expenses_details,
+                    f"{expense.various_expenses_price:.2f} ",
+                    f"{expense.total_expenses:.2f} "
+                ]
+                
+                for col_num, cell_value in enumerate(row, 1):
+                    cell = ws_expenses.cell(row=row_num, column=col_num)
+                    cell.value = cell_value
+                    cell.border = border
+                
+                row_num += 1
+        
+        # Créer un troisième onglet pour les résumés
+        ws_summary = wb.create_sheet(title="Résumé")
+        
+        # Styles pour les titres
+        title_font = Font(name='Arial', bold=True, size=14)
+        subtitle_font = Font(name='Arial', bold=True, size=12)
+        
+        # Titre
+        ws_summary.cell(row=1, column=1).value = "Résumé des Missions"
+        ws_summary.cell(row=1, column=1).font = title_font
+        
+        # Date de génération
+        ws_summary.cell(row=2, column=1).value = f"Généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')}"
+        
+        # Compteurs
+        validated_count = missions.filter(status='VALIDATED').count()
+        new_count = missions.filter(status='NEW').count()
+        refused_count = missions.filter(status='REFUSED').count()
+        
+        # Total des dépenses
+        total_expenses = 0
+        for mission in missions:
+            mission_expenses = sum(expense.total_expenses for expense in mission.depenses.all())
+            total_expenses += mission_expenses
+        
+        # Ajouter les statistiques
+        stats_row = 4
+        ws_summary.cell(row=stats_row, column=1).value = "Statistiques"
+        ws_summary.cell(row=stats_row, column=1).font = subtitle_font
+        
+        ws_summary.cell(row=stats_row+1, column=1).value = "Total des missions:"
+        ws_summary.cell(row=stats_row+1, column=2).value = len(missions)
+        
+        ws_summary.cell(row=stats_row+2, column=1).value = "Missions validées:"
+        ws_summary.cell(row=stats_row+2, column=2).value = validated_count
+        
+        ws_summary.cell(row=stats_row+3, column=1).value = "Nouvelles missions:"
+        ws_summary.cell(row=stats_row+3, column=2).value = new_count
+        
+        ws_summary.cell(row=stats_row+4, column=1).value = "Missions refusées:"
+        ws_summary.cell(row=stats_row+4, column=2).value = refused_count
+        
+        ws_summary.cell(row=stats_row+5, column=1).value = "Total des dépenses:"
+        ws_summary.cell(row=stats_row+5, column=2).value = f"{total_expenses:.2f} "
+        
+        # Ajuster la largeur des colonnes
+        for col in range(1, 3):
+            ws_summary.column_dimensions[chr(64 + col)].width = 25
+        
+        # Sauvegarder dans un buffer
+        buffer = BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        
+        # Créer la réponse HTTP
+        response = HttpResponse(
+            buffer.getvalue(),
+            content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        response['Content-Disposition'] = 'attachment; filename=missions_export.xlsx'
+        
+        return response
+
+
+
+
