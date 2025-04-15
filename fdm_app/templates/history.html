@@ -20,10 +20,8 @@
 
  <!-- historique des demandes validés-->
     <div class="card">
-        <div class="card-header">
-            <h5 class="mb-0">Historique des demandes validées </h5>
-
-            
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Historique des demandes validées</h5>
 
             <div class="d-flex">
               <form method="GET" action="{% url 'history' %}" class="d-flex me-2">
@@ -46,11 +44,13 @@
         </div>
 
         <div class="card-body fade-in">
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <!-- Remplacé table-responsive par table-container -->
+            <div class="table-container">
+                <!-- Ajout de la classe mission-table -->
+                <table class="table table-hover mission-table">
                     <thead>
                         <tr>
-                            <th>ID Mission</th>
+                            <th>ID </th>
                             <th>Lieu</th>
                             <th>Technicien</th>
                             <th>Dates</th>
@@ -85,17 +85,16 @@
                             </td>
                             <!--Facturation-->
                             {% if mission.facturation %}
-                                <td><span class="badge badge-billed" style="background-color:#28a745;">Facturé</span></td>
+                                <td><span class="badge badge-billed">Facturé</span></td>
                             {% else %}
-                                <td><span class="badge badge-not-billed" style="background-color:red;">Non facturé</span></td>
+                                <td><span class="badge badge-not-billed">Non facturé</span></td>
                             {% endif %}
                             <td><span class="badge badge-closed">Clôturé</span></td>
-                            <td>
-                                <button type="button" class="btn btn-link p-0 border-0" 
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#detailModal{{ mission.id }}">
-                                    <i class="fas fa-info-circle details" title="Détails"></i>
-                                </button>
+                            <td class="action-icons">
+                                <i class="fas fa-info-circle details" 
+                                   data-bs-toggle="modal" 
+                                   data-bs-target="#detailModal{{ mission.id }}" 
+                                   title="Détails"></i>
                             </td>
                         </tr>
                     {% endfor %}
@@ -110,7 +109,7 @@
             <ul class="pagination">
               {% if missions.has_previous %}
                 <li class="page-item">
-                  <a class="page-link" href="?page={{ missions.previous_page_number }}" aria-label="Previous">
+                  <a class="page-link" href="?page={{ missions.previous_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                   </a>
                 </li>
@@ -125,18 +124,18 @@
               {% for num in missions.paginator.page_range %}
                 {% if missions.number == num %}
                   <li class="page-item active">
-                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %} ">
+                    <a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">
                       {{ num }}
                     </a>
                   </li>
                 {% elif num > missions.number|add:'-3' and num < missions.number|add:'3' %}
-                  <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">{{ num }}</a></li>
+                  <li class="page-item"><a class="page-link" href="?page={{ num }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}">{{ num }}</a></li>
                 {% endif %}
               {% endfor %}
               
               {% if missions.has_next %}
                 <li class="page-item">
-                  <a class="page-link" href="?page={{ missions.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}" aria-label="Next">
+                  <a class="page-link" href="?page={{ missions.next_page_number }}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}{% if request.GET.per_page %}&per_page={{ request.GET.per_page }}{% endif %}" aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                   </a>
                 </li>
