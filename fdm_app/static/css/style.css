@@ -182,6 +182,15 @@ body {
 .mission-table tbody tr:hover {
   background-color: rgba(69, 88, 201, 0.05);
 }
+/* style pour la longueur du nom */
+.technicien-name {
+  display: inline-block;
+  max-width: 100px; /* Ajustez selon vos besoins */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
 
 /* Badge Styles - Unified */
 .badge {

@@ -68,11 +68,15 @@
                 <td>{{ mission.location }}</td>
                 <td>
                   {% for technicien in mission.techniciens.all %}
-                    {{ technicien.first_name }} {{ technicien.last_name }}<br>
+                    <span class="technicien-name" data-bs-toggle="tooltip" data-bs-placement="top" 
+                          title="{{ technicien.first_name }} {{ technicien.last_name }}">
+                      {{ technicien.first_name }} {{ technicien.last_name }}
+                    </span><br>
                   {% empty %}
                     Aucun technicien
                   {% endfor %}
                 </td>
+
                 <td>{{ mission.start_date|date:"d F Y" }} à {{ mission.start_hour|time:"H:i" }}</td>
                 <td>{{ mission.end_date|date:"d F Y" }} à {{ mission.end_hour|time:"H:i" }}</td>
 
@@ -345,7 +349,7 @@
       const mobileSidebarToggle = document.getElementById('mobileSidebarToggle');
       
     });
-
+  
     document.addEventListener('DOMContentLoaded', function() {
       // Pour la validation
       var validateModal = document.getElementById('validateModal');
@@ -366,6 +370,12 @@
           document.getElementById('refuseMissionId').value = missionId;
         });
       }
+      
+      // Initialisation des tooltips Bootstrap
+      var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+      });
     });
   </script>
 </body>
