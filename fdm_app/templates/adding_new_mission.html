@@ -1,0 +1,140 @@
+<div class="modal-body">
+          <form method="POST" action="{% url 'missions' %}">
+            {% csrf_token %}
+
+            <!--lien bluedesk Odoo de la mission-->
+            <div class="mb-3">
+              <b><font size="4" color="#4558c9">Lien Bluedesk</font></b>
+              <input type="text" class="form-control" name="bluedesk_link" placeholder="insérer le lien bluedesk ici" min="0">
+            </div>
+
+            <!--lieu  -->
+            <h6 class="mt-4 mb-3">
+              <b><font size="4" color="#4558c9">Lieu et techniciens </font></b>
+            </h6>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Lieu de la mission</label>
+                    <input type="text" class="form-control" name="location" placeholder="Ex: Antananarivo" required>
+                </div>
+
+                <!--technicien de la mission-->
+                <div class="col-md-6">
+                    <label class="form-label">Technicien</label>
+                    <select  multiple name="techniciens" id="select-state" required>
+                        {% for technician in technicians %}
+                        <option value="{{ technician.id }}" >{{ technician.id }} - {{technician.first_name}} {{technician.last_name}} </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+               <!--facturation-->
+       <div class="mb-3 form-check">
+         <input type="checkbox" class="form-check-input" name="facturation" id="facturationCheck" >
+        <label class="form-check-label" for="facturationCheck">
+      <b><font size="4" color="#4558c9">Facturer</font></b>
+          </label>
+         </div>
+
+              <!--details de la mission-->
+            <div class="mb-3">
+              <h6 class="mt-4 mb-3">
+                <b><font size="4" color="#4558c9">Détails de la mission</font></b>
+              </h6>
+              <textarea class="form-control" name="mission_details" rows="3" placeholder="Décrivez les détails de la mission" required></textarea>
+            </div>
+
+            <h6 class="mt-4 mb-3">
+              <b><font size="4" color="#4558c9" >Date de la mission</font></b>
+            </h6>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                
+                <label class="form-label">Date de début</label>
+                <input type="date" class="form-control" name="start_date" required>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label">Heure de début</label>
+                <input type="time" class="form-control" name="start_hour" required>
+              </div>
+             </div>
+            
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Date de fin</label>
+                <input type="date" class="form-control" name="end_date" required>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">Heure de fin</label>
+                <input type="time" class="form-control" name="end_hour" required>
+              </div>
+            </div>
+            
+            <h6 class="mt-4 mb-3">
+              <b><font size="4" color="#4558c9">Hébergement</font></b>
+            </h6>
+            <div class="row mb-3">
+              <div class="col-md-6">
+                <label class="form-label">Nombre de jours</label>
+                <input type="number" class="form-control" name="hosting_days" min="0" value="1" >
+              </div>
+              <div class="col-md-6">
+                <label class="form-label"  >Tarif nuitée (Ar)</label>
+                <input type="number" class="form-control" name="overnight_rate" min="0" value="0" >
+              </div>
+              
+            </div>
+            
+            <h6 class="mt-4 mb-3">
+              <b><font size="4" color="#4558c9">Repas</font></b>
+            </h6>
+            <div class="row mb-3">
+              <div class="col-md-12">
+                <label class="form-label">Budget repas/jour (Ar)</label>
+                <input type="number" class="form-control" name="meal_costs" min="0" required>
+              </div>
+              
+            </div>
+            
+            <h6 class="mt-4 mb-3">
+              <b><font size="4" color="#4558c9">Transport</font></b>
+            </h6>
+            <div class="mb-3">
+              <label class="form-label">Moyen de transport</label>
+              <select class="form-select" name="transport" required>
+                <option selected>Choisir un moyen de transport</option>
+                <option value="Taxi-brousse" >Taxi-brousse</option>
+                <option value="Véhicule de société">Véhicule de société</option>
+                <option value="Avion" >Avion</option>
+                <option value="Bateau" >Bateau</option>
+                <option value="À pieds" >À pieds</option>
+                <option value="Transport matériels">Transport matériels</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Coût du transport (Ar)</label>
+              <input type="number" class="form-control" name="shipping_costs" min="0" required>
+            </div>
+            
+            <h6 class="mt-4 mb-3">
+              <b><font size="4" color="#4558c9">Divers frais</font></b>
+            </h6>
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <input type="text" class="form-control" name="various_expenses_details" placeholder="Description des frais divers" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Montant (Ar)</label>
+              <input type="number"  class="form-control" name="various_expenses_price" min="0" value="0" >
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+          <button type="submit" class="btn btn-primary">Soumettre la demande</button>
+        </div>
+      </form>
+      </div>
+    </div>
+  </div>

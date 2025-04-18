@@ -32,6 +32,10 @@ from docx import Document
 from docx.shared import Pt, Inches, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.enum.table import WD_ALIGN_VERTICAL
+from django.core.mail import send_mail
+from django.views.generic.edit import UpdateView
+from django.conf import settings
+
 
 #barre de recherche reutilisable
 class MissionSearchUtils:
@@ -136,7 +140,7 @@ class MissionListView(View):
         missions = PaginationUtils.paginate_queryset(all_missions, request)
 
         # Récupère les techniciens pour le formulaire
-        technicians = Technician.objects.all()
+        technicians = Technician.objects.values('id', 'first_name', 'last_name')
         # Compter les missions avec statut NEW
         new_missions = Mission.objects.filter(status='NEW').count()
         
@@ -358,45 +362,82 @@ class EditMissionView(View):
         return redirect('missions')
     
     
-#pour la validation des missions
+
+# Pour la validation des missions
 class ValidateMissionView(View):
     def post(self, request, *args, **kwargs):
         if not request.user.has_perm('app_name.can_validate_mission'):
             raise PermissionDenied
-        
+            
         mission_id = request.POST.get('mission_id')
         comment = request.POST.get('comment', '')
-        
         mission = get_object_or_404(Mission, id=mission_id)
+        
+        # Mettre à jour le statut
         mission.status = 'VALIDATED'
+        mission.validated_at = datetime.now()
         mission.save()
         
+        # Email de notification avec adresse spécifiée
+        today = datetime.now().strftime("%d/%m/%Y")
+        
+        # Adresse(s) email spécifiée(s) pour recevoir les notifications
+        notification_email = 'mihajarazafimahazoson@gmail.com.com'  # Remplacez par l'adresse souhaitée
+        
+        subject = f"Demande de validation du {today}"
+        message = f"La demande de mission {mission_id} du {today} a été validée par le DG."
+        
+        send_mail(
+            subject,
+            message,
+            'mihajarazafimahazoson@gmail.com',  # Adresse d'expéditeur
+            [notification_email],  # Liste des destinataires
+            fail_silently=True,
+        )
+        
         messages.success(request, f"La mission a été validée avec succès.")
-        # Redirection vers la page de liste ou de détail
-        return redirect(reverse('missions'))  # Ajustez selon vos URLs
-        pass
-    
+        return redirect(reverse('missions'))
 
-#pour le refus de la mission
+# Pour le refus de la mission
 class RefuseMissionView(View):
     def post(self, request, *args, **kwargs):
         if not request.user.has_perm('app_name.can_refuse_mission'):
             raise PermissionDenied
+            
         mission_id = request.POST.get('mission_id')
         refusal_reason = request.POST.get('refusal_reason', '')
         
         if not refusal_reason.strip():
             messages.error(request, "Veuillez saisir un motif de refus.")
             return redirect(reverse('missions'))
-        
+            
         mission = get_object_or_404(Mission, id=mission_id)
+        
+        # Mettre à jour le statut
         mission.status = 'REFUSED'
-        mission.refusal_reason = refusal_reason  # Sauvegarde du motif
+        mission.refusal_reason = refusal_reason
+        mission.refused_at = datetime.now()
         mission.save()
+        
+        # Email de notification avec adresse spécifiée
+        today = datetime.now().strftime("%d/%m/%Y")
+        
+        # Adresse(s) email spécifiée(s) pour recevoir les notifications
+        notification_email = 'mihajarazafimahazoson@gmail.com'  # Remplacez par l'adresse souhaitée
+        
+        subject = f"Demande de validation du {today}"
+        message = f"La demande de mission {mission_id} du {today} a été refusée par le DG.\n\nMotif du refus : {refusal_reason}"
+        
+        send_mail(
+            subject,
+            message,
+            'mihajarazafimahazoson@gmail.com',  # Adresse d'expéditeur
+            [notification_email],  # Liste des destinataires
+            fail_silently=True,
+        )
         
         messages.success(request, f"La mission a été refusée.")
         return redirect(reverse('missions'))
-        pass
     
   
 #class pour le telechargement du pdf dans le modal details 
@@ -894,7 +935,7 @@ class ExportMissionsDocxView(View):
                 row_cells[4].paragraphs[0].runs[0].bold = True
                 row_cells[4].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
                 
-                row_cells[5].text = f"{total_mission_expenses:.2f} €"
+                row_cells[5].text = f"{total_mission_expenses:.2f} Ar"
                 row_cells[5].paragraphs[0].runs[0].bold = True
                 row_cells[5].paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.RIGHT
             
@@ -917,7 +958,7 @@ class ExportMissionsDocxView(View):
         return response
     
     
-    
-    
+
+
     
     
